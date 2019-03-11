@@ -2,7 +2,7 @@
 
 (setq doom-font (font-spec :family "Iosevka" :size 24))
 
-(general-override-mode +1)
+;(general-override-mode +1)
 
 (load! "+evil.el")
 (load! "+hydra.el")
@@ -25,4 +25,12 @@
   '(smerge-refined-removed ((t (:inherit 'smerge-mine))))
   '(smerge-refined-added   ((t (:inherit 'smerge-other)))))
 
+;; command to open markdown files with
 (setq markdown-open-command "typora")
+
+;; remove xref lookup backend from specific major modes
+(add-hook! '(scala-mode)
+  (setq +lookup-definition-functions
+      '(+lookup-dumb-jump-backend
+        +lookup-project-search-backend
+        +lookup-evil-goto-definition-backend)))

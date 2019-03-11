@@ -632,6 +632,15 @@
         (:map sbt-mode-map
           :nv "C-d" #'evil-scroll-down)) )
 
+(map! :mode scala-mode
+      :niv "TAB" 'ensime-company-complete-or-indent
+      :localleader
+      :desc "Start ensime"             :n "s" #'ensime
+      :desc "Shutdown ensime"          :n "x" #'ensime-shutdown
+      :desc "Sbt command"              :n "c" #'sbt-command
+      :desc "Goto next error"          :n "e" #'next-error
+      :desc "Show errors at point"     :n "E" #'ensime-print-errors-at-point)
+
 
 ;; Universal motion repeating keys
 
