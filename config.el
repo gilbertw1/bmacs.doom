@@ -45,3 +45,6 @@
 ;; set specific company backends for scala mode
 (set-company-backend! 'scala-mode
   '(company-dabbrev-code company-capf company-keywords company-files company-dabbrev))
+
+;; turn on company auto completion
+(setq company-idle-delay 0.1)
