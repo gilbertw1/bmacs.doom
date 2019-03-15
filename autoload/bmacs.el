@@ -309,9 +309,21 @@ workspace, otherwise the new workspace is blank."
          (other-buffer current-buffer t)))))
 
 ;;;###autoload
-(defun bmacs/workspace-switch-last ()
+(defun bmacs/workspace-switch-to-previous ()
   "Switches to the last workspace"
   (interactive)
   (if (+workspace-exists-p +workspace--last)
       (+workspace-switch +workspace--last)
     (error "No previous workspace.")))
+
+;;;###autoload
+(defun bmacs/workspace-switch-to-or-create (&optional name)
+  "Switches to an existing workspace matching NAME or creates a
+new workspace."
+  (interactive)
+  (let ((wname (or name
+                   (completing-read "Switch to workspace: " (+workspace-list-names))))
+        (workspaces (+workspace-list-names)))
+    (unless (member wname workspaces)
+      (+workspace/new wname))
+    (+workspace-switch wname)))

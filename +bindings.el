@@ -15,8 +15,15 @@
       :prefix doom-leader-key     "u" #'universal-argument-more
       :prefix doom-leader-alt-key "u" #'universal-argument-more)
 
+(evilem-default-keybindings "g")
+
 ;; Global Keybindings
 (map!
+(:map input-decode-map
+        [?\C-i] [C-i]
+        [S-iso-lefttab] [backtab]
+        (:unless window-system "TAB" [tab]))
+
  [remap evil-jump-to-tag] #'projectile-find-tag
  [remap find-tag]         #'projectile-find-tag
  ;; Essential
@@ -25,6 +32,8 @@
  "M-u"    #'universal-argument
 
  ;;; Evil-esque bindings
+ ;;; Evil jump forward
+ :niv "<C-i>" #'evil-jump-forward
  ;;; Smarter newlines
  :i [remap newline] #'newline-and-indent  ; auto-indent on newline
  :i "C-j"           #'+bmacs/newline    ; default behavior
@@ -84,8 +93,7 @@
  :n "C-S-f"  #'toggle-frame-fullscreen
 
  ;; Works when I accidentally use tmux bindings
- (:desc "tmux emulation"
-   :prefix "C-b"
+ (:prefix ("C-b" "tmux emulation")
    :desc "Window left"                     :nv "h" #'evil-window-left
    :desc "Window down"                     :nv "j" #'evil-window-down
    :desc "Window right"                    :nv "l" #'evil-window-right
@@ -93,6 +101,7 @@
    :desc "Delete current window"           :nv "x" #'delete-window
    :desc "Split window vertical"           :nv "/" #'split-window-right
    :desc "Split window horizontal"         :nv "-" #'split-window-below)
+
  ;; window management (prefix "C-w")
  (:map evil-window-map
    ;; Navigation
@@ -117,18 +126,17 @@
    "c"       #'+workspace/close-window-or-workspace
    "C-C"     #'ace-delete-window)
 
- (:after evil-easymotion
-   (:prefix ("g" . "easymotion")
-     "l"    #'evilem-motion-forward-word-begin
-     "h"    #'evilem-motion-backward-word-begin
-     "L"    #'evilem-motion-forward-WORD-begin
-     "H"    #'evilem-motion-backward-WORD-begin
-     "("    #'evilem-motion-forward-sentance-begin
-     ")"    #'evilem-motion-backward-sentance-begin
-     "n"    #'evilem-motion-search-next
-     "N"    #'evilem-motion-search-previous
-     "SPC"  #'avy-goto-char-timer
-     "g"    #'evil-goto-first-line))
+ (:prefix ("g" . "easymotion")
+   :n "l"    #'evilem-motion-forward-word-begin
+   :n "h"    #'evilem-motion-backward-word-begin
+   :n "L"    #'evilem-motion-forward-WORD-begin
+   :n "H"    #'evilem-motion-backward-WORD-begin
+   :n "("    #'evilem-motion-forward-sentance-begin
+   :n ")"    #'evilem-motion-backward-sentance-begin
+   :n "n"    #'evilem-motion-search-next
+   :n "N"    #'evilem-motion-search-previous
+   :n "SPC"  #'avy-goto-char-timer
+   :n "g"    #'evil-goto-first-line)
 
  (:map help-map
    "'"   #'doom/what-face
@@ -304,11 +312,11 @@
 
       (:prefix ("l" . "workspace")
         :desc "New workspace"                 "n"   #'+workspace/new-with-name
-        :desc "Switch workspace"              "l"   #'+workspace/switch-to
+        :desc "Switch workspace"              "l"   #'bmacs/workspace-switch-to-or-create
         :desc "Delete session"                "x"   #'+workspace/kill-session
         :desc "Delete this workspace"         "d"   #'+workspace/delete
         :desc "Rename workspace"              "r"   #'+workspace/rename
-        :desc "Switch to last workspace"      "TAB" #'bmacs/workspace-switch-last)
+        :desc "Switch to last workspace"      "TAB" #'bmacs/workspace-switch-to-previous)
 
       (:prefix ("n" . "notes")
         :desc "Open deft"           "d"  #'deft
@@ -328,8 +336,6 @@
         :desc "Imenu sidebar" "i" #'imenu-list-smart-toggle
         :desc "Terminal"          "t" #'+term/open
         :desc "Terminal in popup" "T" #'+term/open-popup-in-project
-        :desc "Terminal"          "t" #'+vterm/open
-        :desc "Terminal in popup" "T" #'+vterm/open-popup-in-project
         :desc "Eshell"            "e" #'+eshell/open
         :desc "Eshell in popup"   "E" #'+eshell/open-popup)
 
@@ -377,7 +383,7 @@
         :desc "Split window vertical"        :nv "/" #'split-window-right
         :desc "Split window horizontal"      :nv "-" #'split-window-below
         :desc "Balance windows"              :nv "=" #'balance-windows
-        :desc "Delete current window"        :nv "d" #'+workspace/close-window-or-workspace
+        :desc "Delete current window"        :nv "d" #'delete-window
         :desc "Ace delete window"            :nv "D" #'ace-delete-window
         :desc "Window left"                  :nv "h" #'evil-window-left
         :desc "Window down"                  :nv "j" #'evil-window-down
@@ -621,6 +627,11 @@
         :n "s"   #'gist-star
         :n "S"   #'gist-unstar
         :n "y"   #'gist-print-current-url))
+
+(map! (:after evil-snipe
+        :map (evil-snipe-mode-map evil-snipe-local-mode-map)
+        :n "s" nil
+        :n "S" nil))
 
 ;;; :lang
 (map! (:after markdown-mode
