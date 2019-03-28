@@ -71,6 +71,33 @@ If prefix ARG is set, prompt for a project to search from."
                (message "File '%s' successfully renamed to '%s'" name (file-name-nondirectory new-name))))))))
 
 ;;;###autoload
+(defun bmacs/rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let* ((dir (file-name-directory filename))
+             (new-name (read-file-name "New name: " dir)))
+        (cond ((get-buffer new-name)
+               (error "A buffer named '%s' already exists!" new-name))
+              (t
+               (let ((dir (file-name-directory new-name)))
+                 (when (and (not (file-exists-p dir)) (yes-or-no-p (format "Create directory '%s'?" dir)))
+                   (make-directory dir t)))
+               (rename-file filename new-name 1)
+               (rename-buffer new-name)
+               (set-visited-file-name new-name)
+               (set-buffer-modified-p nil)
+               (when (fboundp 'recentf-add-file)
+                 (recentf-add-file new-name)
+                 (recentf-remove-if-non-kept filename))
+               (when (projectile-project-p)
+                 (call-interactively #'projectile-invalidate-cache))
+               (message "File '%s' successfully renamed to '%s'" name (file-name-nondirectory new-name))))))))
+
+;;;###autoload
 (defun bmacs/delete-file (filename &optional ask-user)
   "Remove specified file or directory.
 
@@ -227,43 +254,6 @@ with weak native support."
          (indent-according-to-mode))))
 
 ;;;###autoload
-(defun doom--backward-delete-whitespace-to-column ()
-  "Delete back to the previous column of whitespace, or as much whitespace as
-possible, or just one char if that's not possible."
-  (interactive)
-  (let* ((context (ignore-errors (sp-get-thing)))
-         (op (plist-get context :op))
-         (cl (plist-get context :cl))
-         open-len close-len)
-    (cond ;; When in strings (sp acts weird with quotes; this is the fix)
-          ;; Also, skip closing delimiters
-          ((and op cl
-                (string= op cl)
-                (and (string= (char-to-string (or (char-before) 0)) op)
-                     (setq open-len (length op)))
-                (and (string= (char-to-string (or (char-after) 0)) cl)
-                     (setq close-len (length cl))))
-           (delete-char (- open-len))
-           (delete-char close-len))
-
-          ;; Delete up to the nearest tab column IF only whitespace between
-          ;; point and bol.
-          ((and (not indent-tabs-mode)
-                (not (bolp))
-                (not (sp-point-in-string))
-                (save-excursion (>= (- (skip-chars-backward " \t")) tab-width)))
-           (let ((movement (% (current-column) tab-width)))
-             (when (= movement 0)
-               (setq movement tab-width))
-             (delete-char (- movement)))
-           (unless (memq (char-before) (list ?\n ?\ ))
-             (insert " ")))
-
-          ;; Otherwise do a regular delete
-          ((delete-char -1)))))
-
-
-;;;###autoload
 (defun +workspace/new-with-name (&optional name clone-p)
   "Create a new workspace named NAME. If CLONE-P is non-nil, clone the current
 workspace, otherwise the new workspace is blank."
@@ -327,3 +317,44 @@ new workspace."
     (unless (member wname workspaces)
       (+workspace/new wname))
     (+workspace-switch wname)))
+
+
+(defun bmacs/counsel-projectile-rg-initial (&optional value)
+  "Ivy version of `projectile-rg'."
+  (interactive)
+  (if (projectile-project-p)
+        (counsel-rg value
+                    (projectile-project-root)
+                    nil
+                    (projectile-prepend-project-name "rg"))
+  (user-error "You're not in a project")))
+
+;;;###autoload
+(defun bmacs/counsel-projectile-rg-region-or-symbol ()
+  "Use `counsel-rg' to search for the selected region or
+ the symbol around point in the current project with git grep."
+  (interactive)
+  (let ((input (if (region-active-p)
+    (buffer-substring-no-properties
+      (region-beginning) (region-end))
+      (thing-at-point 'symbol t))))
+    (if (projectile-project-p)
+      (bmacs/counsel-projectile-rg-initial input)
+      (counsel-rg input))))
+
+;;;###autoload
+(defun bmacs/evil-mc-yank-concat ()
+  "Yanks and concats the selected region for each evil-mc cursor."
+  (interactive)
+  (let ((concat-text ""))
+    (evil-mc-execute-for-all-cursors
+     (lambda (cursor)
+       (let* ((region (evil-mc-get-cursor-region cursor))
+              (region-start (evil-mc-get-region-start region))
+              (region-end (evil-mc-get-region-end region)))
+         (unless region
+           (setq region-start (region-beginning)
+                 region-end (region-end)))
+         (when (and region-start region-end)
+           (setq concat-text (concat concat-text (filter-buffer-substring region-start region-end) "\n"))))))
+    (kill-new concat-text)))

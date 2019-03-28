@@ -1,3 +1,4 @@
+
 ;;; private/gilbertw1/+bindings.el -*- lexical-binding: t; -*-
 
 (setq doom-leader-key "SPC"
@@ -16,10 +17,12 @@
       :prefix doom-leader-alt-key "u" #'universal-argument-more)
 
 (evilem-default-keybindings "g")
+; (define-key evilem-map "gg" nil)
+; (define-key evilem-map "gl" nil)
 
 ;; Global Keybindings
 (map!
-(:map input-decode-map
+ (:map input-decode-map
         [?\C-i] [C-i]
         [S-iso-lefttab] [backtab]
         (:unless window-system "TAB" [tab]))
@@ -31,9 +34,10 @@
  "M-;"    #'eval-expression
  "M-u"    #'universal-argument
 
+ ;:niv "<C-i>"      #'better-jumper-jump-forward
  ;;; Evil-esque bindings
  ;;; Evil jump forward
- :niv "<C-i>" #'evil-jump-forward
+ ;:niv "<C-i>" #'evil-jump-forward
  ;;; Smarter newlines
  :i [remap newline] #'newline-and-indent  ; auto-indent on newline
  :i "C-j"           #'+bmacs/newline    ; default behavior
@@ -127,16 +131,16 @@
    "C-C"     #'ace-delete-window)
 
  (:prefix ("g" . "easymotion")
-   :n "l"    #'evilem-motion-forward-word-begin
-   :n "h"    #'evilem-motion-backward-word-begin
-   :n "L"    #'evilem-motion-forward-WORD-begin
-   :n "H"    #'evilem-motion-backward-WORD-begin
-   :n "("    #'evilem-motion-forward-sentance-begin
-   :n ")"    #'evilem-motion-backward-sentance-begin
-   :n "n"    #'evilem-motion-search-next
-   :n "N"    #'evilem-motion-search-previous
-   :n "SPC"  #'avy-goto-char-timer
-   :n "g"    #'evil-goto-first-line)
+   :nv "l"    #'evilem-motion-forward-word-begin
+   :nv "h"    #'evilem-motion-backward-word-begin
+   :nv "L"    #'evilem-motion-forward-WORD-begin
+   :nv "H"    #'evilem-motion-backward-WORD-begin
+   :nv "("    #'evilem-motion-forward-sentance-begin
+   :nv ")"    #'evilem-motion-backward-sentance-begin
+   :nv "n"    #'evilem-motion-search-next
+   :nv "N"    #'evilem-motion-search-previous
+   :nv "SPC"  #'avy-goto-char-timer
+   :nv "g"    #'evil-goto-first-line)
 
  (:map help-map
    "'"   #'doom/what-face
@@ -185,7 +189,7 @@
       :desc "Switch buffer"           "<"  #'switch-to-buffer
 
       :desc "Search from here"      "?"    #'counsel-rg
-      :desc "Find word in project"  "*"    #'counsel-projectile-rg-region-or-symbol
+      :desc "Find word in project"  "*"    #'bmacs/counsel-projectile-rg-region-or-symbol
       :desc "Toggle last popup"     "~"    #'+popup/toggle
       :desc "Find file"             "."    #'find-file
       :desc "Ace window"            "W"    #'ace-window
@@ -245,7 +249,7 @@
         :desc "Rename current file"            "R" #'bmacs/rename-current-buffer-file
         :desc "Save buffer"                    "s" #'save-buffer
         :desc "Save all buffers"               "S" #'evil-write-all
-        :desc "Neotree toggle"                 "t" #'treemacs/toggle
+        :desc "Project sidebar toggle"         "t" #'+treemacs/toggle
         :desc "Sudo find file"                 "u" #'doom/sudo-find-file
         :desc "Sudo edit this file"            "U" #'doom/sudo-this-file
         :desc "Cleanup this tramp conn"        "x" #'tramp-cleanup-this-connection
@@ -325,19 +329,20 @@
         :desc "Org capture"         "x"  #'org-capture)
 
       (:prefix ("o" . "open")
-        :desc "Org agenda"         "a"  #'org-agenda
-        :desc "Default browser"    "b"  #'browse-url-of-file
-        :desc "Debugger"           "d"  #'+debug/open
-        :desc "REPL"               "r"  #'+eval/open-repl-other-window
-        :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window
-        :desc "Dired"              "-"  #'dired-jump
-        :desc "Project sidebar"              "p" #'+treemacs/toggle
-        :desc "Find file in project sidebar" "P" #'+treemacs/find-file
-        :desc "Imenu sidebar" "i" #'imenu-list-smart-toggle
-        :desc "Terminal"          "t" #'+term/open
-        :desc "Terminal in popup" "T" #'+term/open-popup-in-project
-        :desc "Eshell"            "e" #'+eshell/open
-        :desc "Eshell in popup"   "E" #'+eshell/open-popup)
+        :desc "Dired"                        "-"  #'dired-jump
+        :desc "Org agenda"                   "a"  #'org-agenda
+        :desc "Default browser"              "b"  #'browse-url-of-file
+        :desc "Debugger"                     "d"  #'+debug/open
+        :desc "Eshell"                       "e"  #'+eshell/open
+        :desc "Eshell in popup"              "E"  #'+eshell/open-popup
+        :desc "Imenu sidebar"                "i"  #'imenu-list-smart-toggle
+        :desc "REPL"                         "r"  #'+eval/open-repl-other-window
+        :desc "REPL (same window)"           "R"  #'+eval/open-repl-same-window
+        :desc "Email"                        "m"  #'=email
+        :desc "Project sidebar"              "p"  #'+treemacs/toggle
+        :desc "Find file in project sidebar" "P"  #'+treemacs/find-file
+        :desc "Terminal"                     "t"  #'+term/open
+        :desc "Terminal in popup"            "T"  #'+term/open-popup-in-project)
 
       (:prefix ("p" . "project")
         :desc "Browse project"               "." #'+bmacs/browse-project
@@ -556,6 +561,8 @@
 ;; Editor
 (map!
  :nv "C-SPC" #'+fold/toggle
+ :nv "S-SPC" #'hs-hide-level
+ :nv "C-S-SPC" #'hs-show-all
  :n "gQ"    #'+format:region
 
  ;; evil-mc
@@ -731,3 +738,9 @@ customized by changing `+bmacs-repeat-forward-key' and
 ;   "C-k"    #'previous-line
 ;   "C-S-j"  #'scroll-up-command
 ;   "C-S-k"  #'scroll-down-command)
+
+;; Email
+(map!
+ (:after mu4e
+   (:map mu4e-view-mode-map
+     :n "o" #'ace-link-mu4e)))

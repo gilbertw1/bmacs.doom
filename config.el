@@ -9,7 +9,8 @@
 (load! "+hydra.el")
 (load! "+bindings.el")
 (load! "+banner.el")
-                                        ;
+(load! "+email.el")
+
 ;; avy use all windows
 (setq avy-all-windows t)
 
@@ -21,11 +22,17 @@
           iedit-only-at-symbol-boundaries t
           iedit-toggle-key-default nil)))
 
-(use-package undo-propose
-  :commands (undo-propose))
+(use-package package-lint
+  :commands (package-lint-current-buffer package-lint-buffer))
+
+(use-package play-routes-mode
+  :mode "/routes$")
 
 ;; open *.rest files in restclient mode
 (add-to-list 'auto-mode-alist '("\\.rest\\'" . restclient-mode))
+
+;; open routes.template file type in play routes mode
+(add-to-list 'auto-mode-alist '("/routes.template'" . play-routes-mode))
 
 ;; Override smerge colors
 (custom-set-faces
@@ -48,3 +55,14 @@
 
 ;; turn on company auto completion
 (setq company-idle-delay 0.1)
+
+(add-hook! 'prog-mode
+  (setq doom-inhibit-indent-detection t))
+
+(with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "C-o") 'better-jumper-jump-backward)
+  (define-key evil-motion-state-map (kbd "<C-i>") 'better-jumper-jump-forward))
+
+(set-company-backend! 'mu4e-compose-mode 'company-capf)
+
+(setq +workspaces-on-switch-project-behavior t)
