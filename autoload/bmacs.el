@@ -358,3 +358,17 @@ new workspace."
          (when (and region-start region-end)
            (setq concat-text (concat concat-text (filter-buffer-substring region-start region-end) "\n"))))))
     (kill-new concat-text)))
+
+;;;###autoload
+(defun bmacs/switch-case ()
+  (interactive)
+  (when (use-region-p)
+    (let* ((region-start (region-beginning))
+           (region-end (region-end))
+           (case-fold-search nil)
+           (text (filter-buffer-substring region-start region-end))
+           (upcount (length (replace-regexp-in-string "[a-z]" "" text)))
+           (should-upcase (< upcount (/ (length text) 2))))
+      (if should-upcase
+          (upcase-region region-start region-end)
+        (downcase-region region-start region-end)))))

@@ -10,6 +10,7 @@
 (load! "+bindings.el")
 (load! "+banner.el")
 (load! "+email.el")
+(load! "+indent.el")
 
 ;; avy use all windows
 (setq avy-all-windows t)
@@ -34,6 +35,9 @@
 ;; open routes.template file type in play routes mode
 (add-to-list 'auto-mode-alist '("/routes.template'" . play-routes-mode))
 
+;; Add slight spacing between edge and fringe
+(add-to-list 'default-frame-alist '(internal-border-width . 2))
+
 ;; Override smerge colors
 (custom-set-faces
   '(smerge-refined-removed ((t (:inherit 'smerge-mine))))
@@ -50,11 +54,12 @@
                 +lookup-evil-goto-definition-backend)))
 
 ;; set specific company backends for scala mode
-(set-company-backend! 'scala-mode
-  '(company-dabbrev-code company-capf company-keywords company-files company-dabbrev))
+(set-company-backend! 'scala-mode 'company-dabbrev-code 'company-capf 'company-keywords 'company-files)
 
 ;; turn on company auto completion
-(setq company-idle-delay 0.1)
+(setq company-idle-delay 0.3)
+(setq ensime-company-idle-delay 0.3)
+(setq company-dabbrev-downcase 0)
 
 (add-hook! 'prog-mode
   (setq doom-inhibit-indent-detection t))

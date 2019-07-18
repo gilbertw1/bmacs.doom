@@ -83,9 +83,13 @@
  :v "J" (concat ":m '>+1" (kbd "RET") "gv=gv")
  :v "K" (concat ":m '<-2" (kbd "RET") "gv=gv")
  :n "K" #'evil-previous-line
+ ;; smarter case changing
+ :v "~" #'bmacs/switch-case
 
  ;; Indent on tab
  :nvi "TAB"     #'indent-for-tab-command
+ ;; Yas expand
+ :i "M-TAB"     #'yas-expand
  ;; Temporary escape into emacs mode
  :e [C-escape] #'evil-normal-state
  :n [C-escape] #'evil-emacs-state
@@ -93,6 +97,10 @@
  (:after vc-annotate
    :map vc-annotate-mode-map
    [remap quit-window] #'kill-this-buffer)
+
+
+  (:map (help-mode-map helpful-mode-map)
+   :n "o" 'ace-link-help)
 
  :n "C-S-f"  #'toggle-frame-fullscreen
 
@@ -232,6 +240,7 @@
         :desc "List errors"                 "x"   #'flycheck-list-errors)
 
       (:prefix ("f" . "file")
+        :desc "Find file from here"            "." #'counsel-file-jump
         :desc "Find directory"                 "a" #'dired
         :desc "Counsel bookmark"               "b" #'counsel-bookmark
         :desc "Copy file"                      "c" #'copy-file
@@ -338,7 +347,7 @@
         :desc "Imenu sidebar"                "i"  #'imenu-list-smart-toggle
         :desc "REPL"                         "r"  #'+eval/open-repl-other-window
         :desc "REPL (same window)"           "R"  #'+eval/open-repl-same-window
-        :desc "Email"                        "m"  #'=email
+        :desc "Email"                        "m"  #'=mu4e
         :desc "Project sidebar"              "p"  #'+treemacs/toggle
         :desc "Find file in project sidebar" "P"  #'+treemacs/find-file
         :desc "Terminal"                     "t"  #'+term/open
@@ -408,6 +417,8 @@
 ;; Modules
 (map! (:after evil-mc
         (:map evil-mc-key-map
+          "C-n"            #'evil-mc-make-and-goto-next-match
+          "C-p"            #'evil-mc-make-and-goto-prev-match
           "C-S-j"          #'evil-mc-make-cursor-move-next-line
           "C-S-k"          #'evil-mc-make-cursor-move-prev-line))
 
@@ -552,8 +563,8 @@
         :n "R"     #'neotree-refresh)
 
       :n "C-`"   #'+popup/toggle
-      :n "C-~"   #'+popup/raise
-      :g "C-x p" #'+popup/other
+      :n "C-x p" #'+popup/raise
+      :g "C-~"   #'+popup/other
 
       :m "]d"    #'git-gutter:next-hunk
       :m "[d"    #'git-gutter:previous-hunk)
@@ -725,19 +736,6 @@ customized by changing `+bmacs-repeat-forward-key' and
   "C-s" (if (featurep! :completion ivy)
             #'counsel-minibuffer-history
           #'helm-minibuffer-history))
-
-; (define-key! :keymaps +bmacs-minibuffer-maps
-;   [escape] #'abort-recursive-edit
-;   "C-v"    #'yank
-;   "C-z"    (λ! (ignore-errors (call-interactively #'undo)))
-;   "C-a"    #'move-beginning-of-line
-;   "C-b"    #'backward-word
-;   "C-r"    #'evil-paste-from-register
-;   ;; Scrolling lines
-;   "C-j"    #'next-line
-;   "C-k"    #'previous-line
-;   "C-S-j"  #'scroll-up-command
-;   "C-S-k"  #'scroll-down-command)
 
 ;; Email
 (map!
