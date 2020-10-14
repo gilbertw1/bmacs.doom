@@ -34,9 +34,11 @@
                       (cond ((string-prefix-p "/fastmail" maildir)
                              (mu4e~proc-move docid (mu4e-get-trash-folder msg) "-N"))
                             ((or (string-prefix-p "/gmail" maildir) (string-prefix-p "/stream" maildir))
-                             (shell-command (format "expunge-email-id %s" (mu4e-message-field msg :message-id))))
+                             (message "GMAIL - %s" maildir)
+                             (mu4e-action-retag-message msg "-\\Inbox,+\\Trash,-\\Draft"))
                             (true (mu4e~proc-remove docid))))))
         mu4e-marks)
+  ;(shell-command (format "expunge-email-id %s" (mu4e-message-field msg :message-id)))
 
   (defun bmail-refile-folder-function (msg)
     "Set the refile folder for MSG."

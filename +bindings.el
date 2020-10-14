@@ -228,14 +228,14 @@
 
       (:prefix ("c" . "code")
         :desc "Build"                       "b"   #'+eval/build
-        :desc "Jump to definition"          "d"   #'+lookup/definition
+        ;:desc "Jump to definition"          "d"   #'+lookup/definition
         :desc "Jump to references"          "D"   #'+lookup/references
         :desc "Evaluate buffer/region"      "e"   #'+eval/buffer-or-region
         :desc "Evaluate & replace region"   "E"   #'+eval:replace-region
         :desc "Format buffer/region"        "f"   #'+format/region-or-buffer
         :desc "Dash install docset"         "i"   #'counsel-dash-install-docset
         :desc "Open REPL"                   "r"   #'+eval/open-repl-other-window
-                                        ;:desc "Counsel dash"                "d"   #'counsel-dash
+        :desc "Counsel dash"                "d"   #'counsel-dash
         :desc "Delete trailing newlines"    "W"   #'doom/delete-trailing-newlines
         :desc "List errors"                 "x"   #'flycheck-list-errors)
 
@@ -412,7 +412,7 @@
         :desc "Winner redo"                  :nv "U" #'winner-redo
         :desc "Ace window"                   :nv "W" #'ace-window
         :desc "Manage Windows"               :nv "w" #'bmacs-hydra-window/body
-        :desc "Toggle maximize window"       :nv "m" #'doom/window-zoom))
+        :desc "Toggle maximize window"       :nv "m" #'doom/window-maximize-buffer))
 
 ;; Modules
 (map! (:after evil-mc
@@ -435,8 +435,8 @@
 
       ;; Lookup
       :nv "K"  #'+lookup/documentation
-      :nv "gd" #'+lookup/definition
-      :nv "gD" #'+lookup/references
+      :nv "gd" #'bmacs/jump-definition
+      :nv "gD" #'bmacs/jump-definition-other-window
       :nv "gf" #'+lookup/file
 
       ;; Snippets
@@ -521,11 +521,15 @@
         "C-f"    #'forward-word
         "C-o"    #'ivy-dispatching-done
         "C-l"    #'ivy-alt-done
-        "C-v"    #'yank)
+        "M-o"    #'ivy-dispatching-done
+        "C-v"    #'yank
+        :map ivy-switch-buffer-map
+        "C-k"    #'ivy-previous-line)
       (:after counsel
         :map counsel-ag-map
         "C-SPC"    #'ivy-call-and-recenter ; preview
         "C-l"      #'ivy-done
+        "C-`"      #'+ivy/wgrep-occur
         [backtab]  #'+ivy/wgrep-occur      ; search/replace on results
         [C-return] (+ivy-do-action! #'+ivy-git-grep-other-window-action))
       (:after swiper
@@ -662,13 +666,10 @@
           :nv "C-d" #'evil-scroll-down)) )
 
 (map! :mode scala-mode
-      :niv "TAB" 'ensime-company-complete-or-indent
+      ;:niv "TAB" 'ensime-company-complete-or-indent
       :localleader
-      :desc "Start ensime"             :n "s" #'ensime
-      :desc "Shutdown ensime"          :n "x" #'ensime-shutdown
       :desc "Sbt command"              :n "c" #'sbt-command
-      :desc "Goto next error"          :n "e" #'next-error
-      :desc "Show errors at point"     :n "E" #'ensime-print-errors-at-point)
+      :desc "Goto next error"          :n "e" #'next-error)
 
 
 ;; Universal motion repeating keys
@@ -742,3 +743,7 @@ customized by changing `+bmacs-repeat-forward-key' and
  (:after mu4e
    (:map mu4e-view-mode-map
      :n "o" #'ace-link-mu4e)))
+
+(after! evil-args
+  (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+  (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
