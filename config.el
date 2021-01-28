@@ -19,17 +19,12 @@
 (load! "+indent.el")
 (load! "+dashdocs.el")
 (load! "themes/doom-flatwhite-modified-theme.el")
+(load! "+counsel-jq.el")
+
+(load! "+better-jumper.el")
 
 ;; avy use all windows
 (setq avy-all-windows t)
-
-(use-package evil-iedit-state
-  :commands (evil-iedit-state evil-iedit-state/iedit-mode)
-  :init
-  (progn
-    (setq iedit-current-symbol-default t
-          iedit-only-at-symbol-boundaries t
-          iedit-toggle-key-default nil)))
 
 (use-package package-lint
   :commands (package-lint-current-buffer package-lint-buffer))
@@ -73,10 +68,22 @@
 
 ;; remove xref lookup backend from specific major modes
 (add-hook! (scala-mode)
+  (setq-local lsp-enable-indentation nil)
   (setq-local +lookup-definition-functions
               '(+lookup-dumb-jump-backend
                 +lookup-project-search-backend
                 +lookup-evil-goto-definition-backend)))
+
+; Set default sbt command to compile
+(setq sbt:default-command "compile")
+
+; Never use the home directory as an sbt project
+(defadvice! sbt-find-root-ignore-home (orig-fn name-or-pred &optional dir best-root)
+  "Ignore home directory when selecting sbt root."
+  :around #'sbt:find-root-impl
+  (if (and dir (string= (expand-file-name dir) (expand-file-name "~/")))
+      (sbt:find-root-impl name-or-pred (file-name-directory (directory-file-name dir)) best-root)
+    (funcall orig-fn name-or-pred dir best-root)))
 
 ;; set specific company backends for scala mode
 ;(set-company-backend! 'scala-mode 'company-dabbrev-code 'company-capf 'company-keywords 'company-files)
@@ -100,13 +107,6 @@
 
 (setq +workspaces-on-switch-project-behavior t)
 
-; (setq frame-inhibit-implied-resize t)
-; (setq-default bidi-display-reordering 'left-to-right)
-; (setq-default cursor-in-non-selected-windows nil
-;       highlight-nonselected-windows nil)
-; (setq fast-but-imprecise-scrolling t)
-
-
 (defmacro +ivy-do-action! (action)
   "Returns an interactive lambda that sets the current ivy action and
 immediately runs it on the current candidate (ending the ivy session)."
@@ -129,8 +129,8 @@ immediately runs it on the current candidate (ending the ivy session)."
   (interactive)
   (bmacs/jump-definition t))
 
-(setq-default ivy-read-action-function #'ivy-read-action-ivy)
-;(setq-default ivy-read-action-function #'ivy-hydra-read-action)
+;(setq-default ivy-read-action-function #'ivy-read-action-ivy)
+(setq-default ivy-read-action-function #'ivy-hydra-read-action)
 (put 'customize-themes 'disabled nil)
 
 (custom-set-variables
@@ -196,3 +196,17 @@ immediately runs it on the current candidate (ending the ivy session)."
    (setq-local hl-line-sticky-flag t))
 
 ;(setq-hook! '(mu4e-header-mode mu4e-loading-mode mu4e-view-mode) hl-line-sticky-flag t)
+
+;Evil iedit hack
+(with-eval-after-load 'evil-iedit-state
+    (fset 'iedit-cleanup 'iedit-lib-cleanup))
+
+
+; (with-eval-after-load 'persp-mode
+;   (defadvice persp-delete-other-windows (before better-jumper activate)
+;     (select-window (split-window))))
+
+; (setq persp-reset-windows-on-nil-window-conf
+;       (lambda ()
+;         (message "RESETTING WINDOWS")
+;         (delete-other-windows (split-window))))

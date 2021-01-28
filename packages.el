@@ -4,9 +4,8 @@
 (package! org-mu4e :disable t)
 (package! magit-todos :disable t)
 (package! doom-snippets :disable t)
-(package! ivy-hydra :disable t)
+;(package! ivy-hydra :disable t)
 
-(package! evil-iedit-state)
 (package! package-lint)
 (package! play-routes-mode)
 (package! avy)
@@ -14,4 +13,9 @@
 (package! evil-args)
 (package! git-link)
 
+;; Use default snippets
+(package! doom-snippets :ignore t)
+(package! yasnippet-snippets)
+
 (unpin! doom-themes)
+(unpin! persp-mode)

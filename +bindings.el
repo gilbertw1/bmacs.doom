@@ -88,6 +88,7 @@
 
  ;; Indent on tab
  :nvi "TAB"     #'indent-for-tab-command
+ :m   [tab]     #'indent-for-tab-command
  ;; Yas expand
  :i "M-TAB"     #'yas-expand
  ;; Temporary escape into emacs mode
@@ -113,6 +114,22 @@
    :desc "Delete current window"           :nv "x" #'delete-window
    :desc "Split window vertical"           :nv "/" #'split-window-right
    :desc "Split window horizontal"         :nv "-" #'split-window-below)
+
+ ;; Evil multiedit
+ (:when (featurep! :editor multiple-cursors)
+       ;; evil-multiedit
+       :v  "R"     #'evil-multiedit-match-all
+       :n  "M-d"   #'evil-multiedit-match-symbol-and-next
+       :n  "M-D"   #'evil-multiedit-match-symbol-and-prev
+       :v  "M-d"   #'evil-multiedit-match-and-next
+       :v  "M-D"   #'evil-multiedit-match-and-prev
+       :nv "C-M-d" #'evil-multiedit-restore
+       (:after evil-multiedit
+        (:map evil-multiedit-state-map
+         "M-d"    #'evil-multiedit-match-and-next
+         "M-D"    #'evil-multiedit-match-and-prev
+         "RET"    #'evil-multiedit-toggle-or-restrict-region
+         [return] #'evil-multiedit-toggle-or-restrict-region)))
 
  ;; window management (prefix "C-w")
  (:map evil-window-map
@@ -378,7 +395,7 @@
         :desc "Restart Emacs"                "R" #'doom/restart)
 
       (:prefix ("s" . "search")
-        :desc "IEdit mode"                    :nv "e" #'evil-iedit-state/iedit-mode
+        :desc "Evil Multiedit"                :nv "e" #'evil-multiedit-match-all
         :desc "Swiper search"                 :nv "s" #'swiper)
 
       (:prefix ("t" . "toggle")
@@ -512,8 +529,8 @@
         [escape] #'keyboard-escape-quit
         "C-SPC"  #'ivy-call-and-recenter  ; preview file
         "C-y"    #'yank
-        "C-h"    (kbd "DEL")
         "C-k"    #'ivy-previous-line
+        "C-h"    #'ivy-backward-kill-word
         "C-j"    #'ivy-next-line
         "C-w"    #'ivy-backward-kill-word
         "C-u"    #'ivy-kill-line
