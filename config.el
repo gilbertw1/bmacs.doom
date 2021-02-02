@@ -1,6 +1,7 @@
 ;;; private/gilbertw1/config.el -*- lexical-binding: t; -*-
 
 (setq doom-font (font-spec :family "Iosevka" :size 24))
+;(setq doom-font (font-spec :family "Iosevka" :size 12))
 (setq doom-theme 'doom-city-lights)
 
 (setq org-directory "~/org")
