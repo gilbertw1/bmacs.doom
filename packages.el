@@ -1,6 +1,8 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; private/gilbertw1/packages.el
 
+(package! paredit :recipe (:depth full))
+
 (package! org-mu4e :disable t)
 (package! magit-todos :disable t)
 (package! doom-snippets :disable t)

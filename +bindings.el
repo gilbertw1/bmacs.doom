@@ -651,6 +651,10 @@
         :map (magit-status-mode-map magit-revision-mode-map)
         "C-j" nil
         "C-k" nil)
+      (:after magit
+       :map magit-status-mode-map
+        "TAB" #'magit-section-toggle
+        [tab] #'magit-section-toggle)
       (:map transient-map
         "q" #'transient-quit-one)
 
